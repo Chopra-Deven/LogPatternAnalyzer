@@ -69,12 +69,13 @@ func (worker *Worker) start() {
 
 		case request := <-utils.DetectLogPatternRequest:
 
-			context := store.DetectPattern(request, worker.tokenizers)
+			//context := store.DetectPattern(request, worker.tokenizers)
+			//
+			//utils.WaitGroup.Done()
+			//
+			//utils.DetectedLogPatternResponse <- context
 
-			utils.WaitGroup.Done()
-
-			utils.DetectedLogPatternResponse <- context
-			//utils.DetectedLogPatternResponse <- store.DetectPattern(request, worker.tokenizers)
+			utils.DetectedLogPatternResponse <- store.DetectPattern(request, worker.tokenizers)
 
 		case <-worker.shutdown:
 			return
