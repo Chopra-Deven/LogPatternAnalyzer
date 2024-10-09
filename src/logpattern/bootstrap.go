@@ -3,23 +3,20 @@ package main
 import (
 	"LogPattern/engine"
 	"LogPattern/job"
-	"LogPattern/server"
 	"LogPattern/store"
 	"LogPattern/utils"
-	"encoding/json"
-	"errors"
+	"bufio"
 	"fmt"
-	"net/http"
 	_ "net/http/pprof"
 	"os"
-	"os/signal"
-	"syscall"
+	"time"
 )
 
 var (
 	logger = utils.NewLogger("Bootstrap", "bootstrap")
 )
 
+/*
 func main() {
 
 	defer func() {
@@ -87,8 +84,8 @@ func main() {
 
 	server.Shutdown(workers, cleanUpJob)
 }
+*/
 
-/*
 func main() {
 
 	//file, err := os.Open("samplelogfiles/Linux_Test_Logs.txt") // Replace with your log file name
@@ -126,6 +123,10 @@ func main() {
 
 	start := time.Now()
 
+	utils.DetectLogPatternRequest = make(chan utils.MotadataMap, 100000)
+
+	utils.DetectedLogPatternResponse = make(chan utils.MotadataMap, 100000)
+
 	store.Init()
 
 	cleanUpJob := job.NewPersistenceJob(1)
@@ -144,10 +145,6 @@ func main() {
 
 		workers[index].Start()
 	}
-
-	utils.DetectLogPatternRequest = make(chan utils.MotadataMap, 100000)
-
-	utils.DetectedLogPatternResponse = make(chan utils.MotadataMap, 100000)
 
 	utils.WaitGroup.Add(len(logs))
 
@@ -192,4 +189,3 @@ func main() {
 	//fmt.Println(string(jsonData))
 
 }
-*/
