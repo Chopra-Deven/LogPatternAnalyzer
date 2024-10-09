@@ -1,0 +1,7 @@
+<86>Aug 17 15:10:51 aiops9242 sudo: pam_unix(sudo:session): session opened for user root by (uid=0)
+<86>Aug 17 15:10:52 aiops9242 sudo: pam_unix(sudo:session): session opened for user root by (uid=0)
+<86>Aug 17 15:10:53 aiops9242 sshd[3893200]: pam_unix(sshd:session): session opened for user motadata by (uid=0)
+<86>Aug 17 15:10:54 aiops9242 sshd[123]: pam_unix(sshd:session): session opened for user motadata by (uid=0)
+<86>Aug 17 15:10:55 aiops9242 sshd[123]: pam_unix(sshd:session): session opened for user deven by (uid=0)
+<86>Aug 17 15:10:56 aiops9242 sshd[123]: pam_unix(sshd:session): session opened for user root by (uid=0)
+<86>Aug 17 15:10:56 123 sshd[123]: pam_unix(sshd:session): qwe qaws for user dhsvsl

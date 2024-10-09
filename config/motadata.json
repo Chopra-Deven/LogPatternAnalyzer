@@ -1,0 +1,9 @@
+{
+  "system.log.level" : 2,
+  "max.worker" : 10,
+  "event.publisher.port" : 8889,
+  "event.subscriber.port": 8888,
+  "max.channel.buffer": 1000000,
+  "flush.timer": 300,
+  "pprof.port": 6161
+}
