@@ -3,20 +3,23 @@ package main
 import (
 	"LogPattern/engine"
 	"LogPattern/job"
+	"LogPattern/server"
 	"LogPattern/store"
 	"LogPattern/utils"
-	"bufio"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
 	_ "net/http/pprof"
 	"os"
-	"time"
+	"os/signal"
+	"syscall"
 )
 
 var (
 	logger = utils.NewLogger("Bootstrap", "bootstrap")
 )
 
-/*
 func main() {
 
 	defer func() {
@@ -83,109 +86,4 @@ func main() {
 	<-killSignal
 
 	server.Shutdown(workers, cleanUpJob)
-}
-*/
-
-func main() {
-
-	//file, err := os.Open("samplelogfiles/Linux_Test_Logs.txt") // Replace with your log file name
-	//file, err := os.Open("/home/deven/motadata-workspace/LogPattern/samplelogfiles/Linux Bulk Logs.txt") // Replace with your log file name
-	file, err := os.Open("/home/deven/motadata-workspace/LogPattern/samplelogfiles/Linix60k.txt") // Replace with your log file name
-	//file, err := os.Open("/home/deven/motadata-workspace/LogPattern/samplelogfiles/Linix60k.txt") // Replace with your log file name
-	//file, err := os.Open("/home/deven/motadata-workspace/LogPattern/samplelogfiles/Linix60k.txt") // Replace with your log file name
-
-	records := 60000
-	if err != nil {
-
-		fmt.Println("Error opening file:", err)
-
-		return
-	}
-	defer file.Close()
-
-	var logs []string
-
-	scanner := bufio.NewScanner(file)
-
-	for scanner.Scan() {
-
-		line := scanner.Text()
-
-		logs = append(logs, line)
-	}
-
-	if err := scanner.Err(); err != nil {
-
-		fmt.Println("Error reading file:", err)
-	}
-
-	logs = logs[0:records]
-
-	start := time.Now()
-
-	utils.DetectLogPatternRequest = make(chan utils.MotadataMap, 100000)
-
-	utils.DetectedLogPatternResponse = make(chan utils.MotadataMap, 100000)
-
-	store.Init()
-
-	cleanUpJob := job.NewPersistenceJob(1)
-
-	cleanUpJob.Start()
-
-	workers := make([]*engine.Worker, utils.GetMaxWorker())
-
-	utils.DetectLogPatternRequest = make(chan utils.MotadataMap, utils.GetMaxChannelBuffer())
-
-	for index := 0; index < 10; index++ {
-
-		logger.Info(utils.MotadataString(fmt.Sprintf("Worker %d initiated", index)))
-
-		workers[index] = engine.NewWorker(index)
-
-		workers[index].Start()
-	}
-
-	utils.WaitGroup.Add(len(logs))
-
-	for _, log := range logs {
-
-		event := utils.MotadataMap{}
-
-		event["plugin.id"] = "500009"
-
-		event["event.category"] = "Other"
-
-		event["message"] = log
-
-		utils.DetectLogPatternRequest <- event
-
-		//store.DetectPattern(event)
-	}
-
-	utils.WaitGroup.Wait()
-
-	t := time.Now()
-
-	fmt.Printf("\nTotal time taken : %v", t.Sub(start))
-
-	store.Flush(utils.CurrentDir + utils.PathSeparator + utils.ConfigDirectory + utils.PathSeparator + "log-patterns")
-
-	//fmt.Printf("\nTotal pattern detected items : %v", store.GetItemsLength())
-	//fmt.Printf("\nTotal pattern detected Patterns : %v %s", patterns., "\n")
-
-	//Convert the standard map to JSON
-	//jsonData, err := json.MarshalIndent(store.GetStandardMap(), "", "  ")
-	//if err != nil {
-	//	fmt.Println("Error converting to JSON:", err)
-	//	return
-	//}
-
-	//store.PrintPatterIDs()
-	//
-	//_ = jsonData
-
-	//Print the JSON output
-	//fmt.Println(string(jsonData))
-
 }
