@@ -55,10 +55,17 @@ func Init() {
 		{value: "<HEX>", pattern: pcre.MustCompile("(0x[a-f0-9A-F]+)((?=[^A-Za-z0-9])|$)")},
 		{value: "<CMD>", pattern: pcre.MustCompile("(?<=executed cmd )(\".+?\")")},
 	}
-
 }
 
-func DetectPattern(context utils.MotadataMap, tokenizers []*utils.Tokenizer) utils.MotadataMap {
+func DetectPattern(context utils.MotadataMap, tokenizers []*utils.Tokenizer, matchedTokens []int) utils.MotadataMap {
+
+	defer func() {
+
+		if err := recover(); err != nil {
+
+			logger.Fatal(utils.MotadataString(fmt.Sprintf("Panic %v recovered", err)))
+		}
+	}()
 
 	atomic.AddInt32(&patternCounter, 1)
 
@@ -70,9 +77,7 @@ func DetectPattern(context utils.MotadataMap, tokenizers []*utils.Tokenizer) uti
 
 	message = mask(message)
 
-	tokenizers[0].Split(message, utils.SpaceSeparator)
-
-	//tokens := strings.Split(message, utils.SpaceSeparator)
+	tokenizers[0].Tokenize(message)
 
 	// Check if plugin already has patterns
 	if idsRaw, ok := patternIds.Get(plugin); ok {
@@ -91,9 +96,7 @@ func DetectPattern(context utils.MotadataMap, tokenizers []*utils.Tokenizer) uti
 
 						stringPattern := pattern.(string)
 
-						tokenizers[1].Split(stringPattern, utils.SpaceSeparator)
-
-						//patternTokens := strings.Split(stringPattern, utils.SpaceSeparator)
+						tokenizers[1].Tokenize(stringPattern)
 
 						if tokenizers[1].Counts > tokenizers[0].Counts {
 
@@ -109,7 +112,7 @@ func DetectPattern(context utils.MotadataMap, tokenizers []*utils.Tokenizer) uti
 
 						}
 
-						tokens := matchTokens(tokenizers[1].Tokens[:tokenizers[1].Counts], tokenizers[0].Tokens[:tokenizers[0].Counts], min, max)
+						tokens := matchTokens2(tokenizers[1].Tokens[:tokenizers[1].Counts], tokenizers[0].Tokens[:tokenizers[0].Counts], min, max, matchedTokens)
 
 						if tokens != nil && len(tokens) > 0 {
 
@@ -148,7 +151,6 @@ func DetectPattern(context utils.MotadataMap, tokenizers []*utils.Tokenizer) uti
 
 									context["pattern"] = value.(string)
 								}
-
 								return context
 							}
 						}
@@ -190,7 +192,7 @@ func matchTokens(patternTokens, messageTokens []string, min, max int) []int {
 
 	for i := 0; i < min; i++ {
 
-		score := getScore(strings.TrimSpace(patternTokens[i]), strings.TrimSpace(messageTokens[i]))
+		score := getScore(patternTokens[i], messageTokens[i])
 
 		patternScore += 1 * (score / float64(max))
 
@@ -201,6 +203,34 @@ func matchTokens(patternTokens, messageTokens []string, min, max int) []int {
 
 	if (1 - patternScore) <= MatchingScore {
 		return tokens
+	}
+
+	return nil
+}
+
+// MatchTokens function compares tokens and returns the matching indices
+func matchTokens2(patternTokens, messageTokens []string, min, max int, matchedToken []int) []int {
+
+	var patternScore float64
+
+	count := 0
+
+	matchedToken = matchedToken[:count]
+
+	for i := 0; i < min; i++ {
+
+		score := getScore(patternTokens[i], messageTokens[i])
+
+		patternScore += 1 * (score / float64(max))
+
+		if score == 1 {
+			matchedToken = append(matchedToken, i)
+			count++
+		}
+	}
+
+	if (1 - patternScore) <= MatchingScore {
+		return matchedToken[:count]
 	}
 
 	return nil
@@ -277,13 +307,17 @@ func contains(slice []int, elem int) bool {
 
 func getScore(token1, token2 string) float64 {
 
-	if len(token1) > 0 && len(token1) > 0 && !strings.EqualFold(token1, PatternPlaceHolder) && !strings.EqualFold(token2, PatternPlaceHolder) && token1 == token2 {
+	if len(token1) > 0 && len(token1) > 0 && !caseInsensitiveEqual(token1, PatternPlaceHolder) && !caseInsensitiveEqual(token2, PatternPlaceHolder) && token1 == token2 {
 
 		return 1
 
 	}
 
 	return 0
+}
+
+func caseInsensitiveEqual(s1, s2 string) bool {
+	return strings.ToLower(s1) == strings.ToLower(s2)
 }
 
 func mask(message string) string {
@@ -312,19 +346,18 @@ func Flush(path string) {
 
 	data["items"] = itemsMap
 
-	stats["items"] = itemsMap
+	//stats["items"] = itemsMap
 
-	standardMap := make(map[int]interface{})
-	// Convert sync.Map to a standard map
+	/*standardMap := make(map[int]interface{})
+
 	patterns.Range(func(key, value interface{}) bool {
 		intKey := key.(int)         // Type assertion to int for the key
 		standardMap[intKey] = value // Direct assignment into standard map
 		return true
-	})
+	})*/
 
-	stats["standards"] = standardMap
+	//stats["standards"] = standardMap
 
-	// Convert patternIds cmap to a standard map
 	patternIdsMap := make(map[string]interface{})
 	for item := range patternIds.IterBuffered() {
 
@@ -336,9 +369,11 @@ func Flush(path string) {
 
 	data["last.patternID"] = atomic.LoadInt32(&patternId)
 
-	stats["patternIds"] = patternIdsMap
+	//stats["patternIds"] = patternIdsMap
 
 	stats["total.items"] = items.Count()
+
+	stats["total.patternIDs"] = patternIds.Count()
 
 	stats["detected.patterns"] = atomic.LoadInt32(&patternCounter)
 

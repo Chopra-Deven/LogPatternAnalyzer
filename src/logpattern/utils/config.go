@@ -1,10 +1,8 @@
 package utils
 
 import (
-	"strings"
 	"sync"
 	"time"
-	"unicode"
 )
 
 var (
@@ -14,112 +12,6 @@ var (
 
 	WaitGroup = sync.WaitGroup{}
 )
-
-type Tokenizer struct {
-	Tokens []string
-
-	startIndex, Counts, index int
-}
-
-func NewTokenizer(tokens int) *Tokenizer {
-	return &Tokenizer{
-		Tokens: make([]string, tokens),
-	}
-}
-
-// tokenizer methods
-
-func (tokenizer *Tokenizer) Split(value, delimiter string) {
-
-	tokenizer.startIndex, tokenizer.Counts, tokenizer.index = 0, 0, 0
-
-	for {
-
-		tokenizer.index = strings.Index(value[tokenizer.startIndex:], delimiter)
-
-		if tokenizer.index == -1 {
-			break
-		}
-
-		tokenizer.Tokens[tokenizer.Counts] = value[tokenizer.startIndex : tokenizer.startIndex+tokenizer.index]
-
-		tokenizer.Counts++
-
-		tokenizer.startIndex += tokenizer.index + len(delimiter)
-	}
-
-	tokenizer.Tokens[tokenizer.Counts] = value[tokenizer.startIndex:]
-
-	tokenizer.Counts++
-}
-
-func Tokenize(word string, tokens []string, startIndices []int, endIndices []int) []string {
-
-	return tokenize(word, tokens, startIndices, endIndices, func(r rune) bool {
-		return !unicode.IsLetter(r) && !unicode.IsDigit(r)
-	})
-}
-
-func tokenize(word string, tokens []string, startIndices []int, endIndices []int, f func(rune) bool) []string {
-
-	count := 0
-
-	start := -1 // valid span start if >= 0
-
-	for end, runes := range word {
-
-		if f(runes) {
-
-			if start >= 0 {
-
-				startIndices[count] = start
-
-				endIndices[count] = end
-
-				count++
-
-				start = ^start
-			}
-		} else {
-
-			if start < 0 {
-
-				start = end
-			}
-		}
-	}
-
-	// Last field might end at EOF.
-	if start >= 0 {
-
-		startIndices[count] = start
-
-		endIndices[count] = len(word)
-
-		count++
-	}
-
-	// Create strings from recorded field indices.
-
-	index := 0
-
-	for i := 0; i < count; i++ {
-
-		if endIndices[i]-startIndices[i] > 0 {
-
-			// Check if the token contains at least one letter
-
-			if strings.IndexFunc(word[startIndices[i]:endIndices[i]], unicode.IsLetter) >= 0 {
-
-				tokens[index] = strings.ToLower(word[startIndices[i]:endIndices[i]])
-
-				index++
-			}
-		}
-	}
-
-	return tokens[:index]
-}
 
 func InitConfig(configurations MotadataMap) {
 

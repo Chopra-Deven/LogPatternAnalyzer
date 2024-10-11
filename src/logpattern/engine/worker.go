@@ -9,10 +9,11 @@ import (
 var logger = utils.NewLogger("Worker", "worker")
 
 type Worker struct {
-	id         int
-	shutdown   chan struct{}
-	close      bool
-	tokenizers []*utils.Tokenizer
+	id            int
+	shutdown      chan struct{}
+	close         bool
+	tokenizers    []*utils.Tokenizer
+	matchedTokens []int
 }
 
 func NewWorker(id int) *Worker {
@@ -21,14 +22,15 @@ func NewWorker(id int) *Worker {
 
 	for index := range tokenizers {
 
-		tokenizers[index] = utils.NewTokenizer(100)
+		tokenizers[index] = utils.NewTokenizer(100000)
 
 	}
 
 	return &Worker{
-		id:         id,
-		shutdown:   make(chan struct{}),
-		tokenizers: tokenizers,
+		id:            id,
+		shutdown:      make(chan struct{}),
+		tokenizers:    tokenizers,
+		matchedTokens: make([]int, 100000),
 	}
 }
 
@@ -69,13 +71,10 @@ func (worker *Worker) start() {
 
 		case request := <-utils.DetectLogPatternRequest:
 
-			//context := store.DetectPattern(request, worker.tokenizers)
-			//
-			//utils.WaitGroup.Done()
-			//
-			//utils.DetectedLogPatternResponse <- context
+			utils.DetectedLogPatternResponse <- store.DetectPattern(request, worker.tokenizers, worker.matchedTokens)
 
-			utils.DetectedLogPatternResponse <- store.DetectPattern(request, worker.tokenizers)
+			//context := store.DetectPattern(request, worker.tokenizers, worker.matchedTokens)
+			//utils.DetectedLogPatternResponse <- context
 
 		case <-worker.shutdown:
 			return
