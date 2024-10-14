@@ -4,6 +4,7 @@ import (
 	"LogPattern/engine"
 	"LogPattern/job"
 	"LogPattern/utils"
+	"fmt"
 	zmq "github.com/pebbe/zmq4"
 	"time"
 )
@@ -19,6 +20,15 @@ var (
 )
 
 func Start() bool {
+
+	defer func() {
+
+		if err := recover(); err != nil {
+
+			logger.Fatal(utils.MotadataString(fmt.Sprintf("Panic %v recovered", err)))
+		}
+	}()
+
 	var err error
 
 	zContext, err = zmq.NewContext()
@@ -46,9 +56,9 @@ func Start() bool {
 		return false
 	}
 
-	utils.DetectLogPatternRequest = make(chan utils.MotadataMap, 100000)
+	utils.DetectLogPatternRequest = make(chan utils.MotadataMap, utils.GetMaxChannelBuffer())
 
-	utils.DetectedLogPatternResponse = make(chan utils.MotadataMap, 100000)
+	utils.DetectedLogPatternResponse = make(chan utils.MotadataMap, utils.GetMaxChannelBuffer())
 
 	subscriber.Start()
 
