@@ -50,9 +50,9 @@ func TestBootstrap(t *testing.T) {
 
 	start := time.Now()
 
-	utils.DetectLogPatternRequest = make(chan utils.MotadataMap, 100000)
+	utils.DetectLogPatternRequest = make(chan utils.MotadataMap, utils.GetMaxChannelBuffer())
 
-	utils.DetectedLogPatternResponse = make(chan utils.MotadataMap, 100000)
+	utils.DetectedLogPatternResponse = make(chan utils.MotadataMap, utils.GetMaxChannelBuffer())
 
 	store.Init()
 
@@ -61,8 +61,6 @@ func TestBootstrap(t *testing.T) {
 	cleanUpJob.Start()
 
 	workers := make([]*engine.Worker, utils.GetMaxWorker())
-
-	utils.DetectLogPatternRequest = make(chan utils.MotadataMap, utils.GetMaxChannelBuffer())
 
 	for index := 0; index < 10; index++ {
 

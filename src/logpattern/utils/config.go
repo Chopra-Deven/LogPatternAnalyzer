@@ -32,9 +32,9 @@ func GetMaxWorker() int {
 
 func GetMaxChannelBuffer() int {
 
-	if config.Contains("event.backlog.size") {
+	if config.Contains("log.pattern.max.channel.buffer") {
 
-		return config.GetIntValue("event.backlog.size")
+		return config.GetIntValue("log.pattern.max.channel.buffer")
 	}
 
 	return 1000000
