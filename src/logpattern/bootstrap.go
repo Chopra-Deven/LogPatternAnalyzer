@@ -13,6 +13,7 @@ import (
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 )
 
@@ -25,6 +26,9 @@ func main() {
 	defer func() {
 
 		if err := recover(); err != nil {
+			stackTraceBytes := make([]byte, 1<<20)
+
+			logger.Fatal(utils.MotadataString(fmt.Sprintf("Stack Trace of panic : \n%v", string(stackTraceBytes[:runtime.Stack(stackTraceBytes, false)]))))
 
 			logger.Fatal(utils.MotadataString(fmt.Sprintf("Panic %v recovered", err)))
 		}
@@ -62,7 +66,7 @@ func main() {
 
 		store.Init()
 
-		cleanUpJob := job.NewPersistenceJob(1)
+		cleanUpJob = job.NewPersistenceJob(1)
 
 		cleanUpJob.Start()
 

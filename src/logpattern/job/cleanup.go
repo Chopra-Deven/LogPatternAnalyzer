@@ -25,11 +25,11 @@ func NewPersistenceJob(id int) *PersistenceJob {
 
 func (job *PersistenceJob) Start() {
 
-	utils.WaitGroup.Add(1)
-
-	defer utils.WaitGroup.Done()
-
 	go func() {
+
+		utils.WaitGroup.Add(1)
+
+		defer utils.WaitGroup.Done()
 
 		for {
 			if !job.close {

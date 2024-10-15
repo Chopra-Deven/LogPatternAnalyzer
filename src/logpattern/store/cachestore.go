@@ -373,7 +373,7 @@ func Flush(path string) {
 
 	stats["total.items"] = items.Count()
 
-	stats["total.patternIDs"] = patternIds.Count()
+	stats["total.plugins"] = patternIds.Count()
 
 	stats["detected.patterns"] = atomic.LoadInt32(&patternCounter)
 
@@ -416,9 +416,7 @@ func Flush(path string) {
 
 func loadPatterns() {
 
-	path := utils.CurrentDir + utils.PathSeparator + utils.ConfigDirectory + utils.PathSeparator + "log-patterns"
-
-	compressedData, err := os.ReadFile(path)
+	compressedData, err := os.ReadFile(utils.CurrentDir + utils.PathSeparator + utils.ConfigDirectory + utils.PathSeparator + "log-patterns")
 	if err != nil {
 		logger.Info(utils.MotadataString(fmt.Sprintf("Error reading file: %v", err)))
 		return
