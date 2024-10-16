@@ -40,6 +40,8 @@ var (
 
 func Init() {
 
+	logger.Info("Initializing Cache Store...")
+
 	loadPatterns()
 
 	lookupPatterns = []*MaskingPattern{
@@ -112,7 +114,7 @@ func DetectPattern(context utils.MotadataMap, tokenizers []*utils.Tokenizer, mat
 
 						}
 
-						tokens := matchTokens2(tokenizers[1].Tokens[:tokenizers[1].Counts], tokenizers[0].Tokens[:tokenizers[0].Counts], min, max, matchedTokens)
+						tokens := matchTokens(tokenizers[1].Tokens[:tokenizers[1].Counts], tokenizers[0].Tokens[:tokenizers[0].Counts], min, max, matchedTokens)
 
 						if tokens != nil && len(tokens) > 0 {
 
@@ -184,32 +186,7 @@ func DetectPattern(context utils.MotadataMap, tokenizers []*utils.Tokenizer, mat
 }
 
 // MatchTokens function compares tokens and returns the matching indices
-func matchTokens(patternTokens, messageTokens []string, min, max int) []int {
-
-	var patternScore float64
-
-	var tokens []int
-
-	for i := 0; i < min; i++ {
-
-		score := getScore(patternTokens[i], messageTokens[i])
-
-		patternScore += 1 * (score / float64(max))
-
-		if score == 1 {
-			tokens = append(tokens, i)
-		}
-	}
-
-	if (1 - patternScore) <= MatchingScore {
-		return tokens
-	}
-
-	return nil
-}
-
-// MatchTokens function compares tokens and returns the matching indices
-func matchTokens2(patternTokens, messageTokens []string, min, max int, matchedToken []int) []int {
+func matchTokens(patternTokens, messageTokens []string, min, max int, matchedToken []int) []int {
 
 	var patternScore float64
 

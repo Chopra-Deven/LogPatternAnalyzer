@@ -68,7 +68,16 @@ func GetFlushTimer() int {
 
 		return config.GetIntValue("log.pattern.flush.timer.seconds")
 	}
-	return 120
+	return 300
+}
+
+func GetIOWorkers() int {
+
+	if config.Contains("log.pattern.io.workers") {
+
+		return config.GetIntValue("log.pattern.io.workers")
+	}
+	return 2
 }
 
 func GetPublisherPort() MotadataString {

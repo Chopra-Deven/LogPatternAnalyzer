@@ -36,11 +36,11 @@ func NewWorker(id int) *Worker {
 
 func (worker *Worker) Start() {
 
-	utils.WaitGroup.Add(1)
-
-	defer utils.WaitGroup.Done()
-
 	go func() {
+
+		utils.WaitGroup.Add(1)
+
+		defer utils.WaitGroup.Done()
 
 		for {
 			if !worker.close {
@@ -65,6 +65,8 @@ func (worker *Worker) start() {
 
 	}()
 
+	logger.Info(utils.MotadataString(fmt.Sprintf("Worker %d initiated", worker.id)))
+
 	for {
 
 		select {
@@ -73,10 +75,10 @@ func (worker *Worker) start() {
 
 			utils.DetectedLogPatternResponse <- store.DetectPattern(request, worker.tokenizers, worker.matchedTokens)
 
-			//context := store.DetectPattern(request, worker.tokenizers, worker.matchedTokens)
-			//utils.DetectedLogPatternResponse <- context
-
 		case <-worker.shutdown:
+
+			logger.Info(utils.MotadataString(fmt.Sprintf("Shutting Down worker %d", worker.id)))
+
 			return
 		}
 

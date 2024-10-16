@@ -5,46 +5,6 @@ import (
 	"unicode"
 )
 
-type Tokenizer3 struct {
-	Tokens []string
-
-	startIndex, Counts, index int
-}
-
-func NewTokenizer3(tokens int) *Tokenizer3 {
-	return &Tokenizer3{
-		Tokens: make([]string, tokens),
-	}
-}
-
-// tokenizer methods
-
-func (tokenizer *Tokenizer3) Split(value, delimiter string) {
-
-	tokenizer.startIndex, tokenizer.Counts, tokenizer.index = 0, 0, 0
-
-	for {
-
-		tokenizer.index = strings.Index(value[tokenizer.startIndex:], delimiter)
-
-		if tokenizer.index == -1 {
-			break
-		}
-
-		tokenizer.Tokens[tokenizer.Counts] = value[tokenizer.startIndex : tokenizer.startIndex+tokenizer.index]
-
-		tokenizer.Counts++
-
-		tokenizer.startIndex += tokenizer.index + len(delimiter)
-	}
-
-	tokenizer.Tokens[tokenizer.Counts] = value[tokenizer.startIndex:]
-
-	tokenizer.Counts++
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 type Tokenizer struct {
 	Tokens                   []string
 	startIndices, endIndices []int

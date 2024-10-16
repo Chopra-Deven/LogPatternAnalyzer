@@ -39,7 +39,7 @@ func Start() bool {
 
 	time.Sleep(1 * time.Second)
 
-	err = zContext.SetIoThreads(1) // TODO - need to know the exact use case of this parameter.
+	err = zContext.SetIoThreads(utils.GetIOWorkers())
 
 	if err != nil {
 		panic(err)

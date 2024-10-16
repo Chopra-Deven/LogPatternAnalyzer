@@ -37,7 +37,7 @@ func (publisher *Publisher) Start() {
 
 	_ = publisher.socket.SetLinger(0)
 
-	err := publisher.socket.Connect(string("tcp://localhost:" + utils.GetPublisherPort()))
+	err := publisher.socket.Connect(string("tcp://" + utils.GetHost() + ":" + utils.GetPublisherPort()))
 
 	if err != nil {
 		panic(err) // TODO -- need to handle this properly
@@ -56,9 +56,6 @@ func (publisher *Publisher) Start() {
 				if err != nil {
 
 					publisherLogger.Info(utils.MotadataString(fmt.Sprintf("error %v occured while sending publisher response ", err)))
-				} else {
-
-					//publisherLogger.Info(utils.MotadataString(fmt.Sprintf("Event published Successfully")))
 				}
 			}
 		}
@@ -68,9 +65,7 @@ func (publisher *Publisher) Start() {
 
 func prepareEvent(response utils.MotadataMap, topic utils.MotadataString) []byte {
 
-	event := response
-
-	bytes, err := json.MarshalIndent(event, "", "  ")
+	bytes, err := json.MarshalIndent(response, "", "  ")
 
 	if err != nil {
 

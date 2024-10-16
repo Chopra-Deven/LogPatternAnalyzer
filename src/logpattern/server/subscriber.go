@@ -64,12 +64,12 @@ func (subscriber *Subscriber) Start() {
 
 			if err := recover(); err != nil {
 
-				subscriberLogger.Fatal(utils.MotadataString(fmt.Sprintf("error %v occurred in data-write subscriber...", err)))
+				subscriberLogger.Fatal(utils.MotadataString(fmt.Sprintf("error %v occurred in log-patterns subscriber...", err)))
 
 				_ = subscriber.socket.Close()
 			}
 
-			subscriberLogger.Info("data-write subscriber exiting...")
+			subscriberLogger.Info("log-pattern subscriber exiting...")
 		}()
 
 		for {
@@ -86,11 +86,6 @@ func (subscriber *Subscriber) Start() {
 				if err == nil {
 
 					if len(bytes) > 0 {
-
-						if utils.TraceEnabled() {
-
-							subscriberLogger.Trace("sending event to request channel")
-						}
 
 						event := utils.MotadataMap{}
 
@@ -116,12 +111,12 @@ func (subscriber *Subscriber) Start() {
 
 						_ = subscriber.socket.Close()
 
-						subscriberLogger.Info("data-write socket closed, reason: zmq context was terminated")
+						subscriberLogger.Info("log-pattern socket closed, reason: zmq context was terminated")
 
 						return
 					}
 
-					subscriberLogger.Fatal(utils.MotadataString(fmt.Sprintf("failed to subscribe data-write request,reason : error %v occured", err)))
+					subscriberLogger.Fatal(utils.MotadataString(fmt.Sprintf("failed to subscribe log-pattern request,reason : error %v occured", err)))
 
 				}
 
@@ -131,16 +126,16 @@ func (subscriber *Subscriber) Start() {
 
 				if err != nil {
 
-					subscriberLogger.Fatal(utils.MotadataString(fmt.Sprintf("error occured while closing data-write socket reason : %s", err.Error())))
+					subscriberLogger.Fatal(utils.MotadataString(fmt.Sprintf("error occured while closing log-pattern socket reason : %s", err.Error())))
 				}
 
 				if subscriber.Close {
 
-					subscriberLogger.Info("data-write socket closed, reason : subscriber close event received")
+					subscriberLogger.Info("log-pattern socket closed, reason : subscriber close event received")
 
 				} else {
 
-					subscriberLogger.Info("data-write socket closed, reason : shutdown event received")
+					subscriberLogger.Info("log-pattern socket closed, reason : shutdown event received")
 
 				}
 

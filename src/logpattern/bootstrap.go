@@ -66,6 +66,8 @@ func main() {
 
 		store.Init()
 
+		logger.Info("Log-Pattern process started successfully...")
+
 		cleanUpJob = job.NewPersistenceJob(1)
 
 		cleanUpJob.Start()
@@ -74,13 +76,13 @@ func main() {
 
 		for index := 0; index < utils.GetMaxWorker(); index++ {
 
-			logger.Info(utils.MotadataString(fmt.Sprintf("Worker %d initiated", index)))
-
 			workers[index] = engine.NewWorker(index)
 
 			workers[index].Start()
 		}
 
+	} else {
+		logger.Info("Failed to start Log-Pattern process!!!")
 	}
 
 	signal.Notify(killSignal, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL, syscall.SIGQUIT)
