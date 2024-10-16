@@ -68,6 +68,8 @@ func (job *PersistenceJob) start() {
 
 		case <-job.shutdown:
 
+			logger.Info("Flushing data into file...")
+
 			store.Flush(utils.CurrentDir + utils.PathSeparator + utils.ConfigDirectory + utils.PathSeparator + "log-patterns")
 
 			return

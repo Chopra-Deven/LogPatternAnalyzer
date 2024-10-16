@@ -87,5 +87,7 @@ func main() {
 
 	<-killSignal
 
+	logger.Info("Shutting down log-pattern process!")
+
 	server.Shutdown(workers, cleanUpJob)
 }
